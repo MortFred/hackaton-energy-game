@@ -18,17 +18,11 @@ class BaseGenerator:
         self.co2_rate = co2_rate
         self.nok_rate = nok_rate
 
-    def get_power(self, time=None):
-        """
-        Return power generation for given time
-            Parameters:
-                    time (float, int) [Optional: default = None: Time of day [mins] . If None, return entire day.
-            Returns:
-                    power (float, dict): power generation at time provided or dict of time [mins] and generation values.
-        """
-        # return generation for current time
-        power = self.power[time] if time else self.power
-        return power
+    def calculate_costs(self):
+        # calculate finanical and emissions costs
+        power_total = sum(self.power.values())*self.time_delta*60
+        self.co2 = power_total*self.co2_rate
+        self.nok = power_total*self.nok_rate
     
 
 class SolarGenerator(BaseGenerator):
@@ -47,11 +41,12 @@ class SolarGenerator(BaseGenerator):
         self.range = range_
         self.peak_time = peak_time
 
-        # claculate power profile
+        # claculate values
         self.calculate_power_profile()
+        self.calculate_costs()
 
     def calculate_power_profile(self):
-        # calculate daily profile
+        # calculate daily power profile
         self.power = {}
         for i in range(math.ceil(24*60/self.time_delta)+1):
             self.power[self.time_delta*i] = norm.pdf(self.time_delta*i, 12*60, self.range/2/3)
