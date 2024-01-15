@@ -33,4 +33,6 @@ if button_display:
     df['wave'] = [wave] * 31
     df['tidal'] = [tidal] * 31
 
+    df['_total'] = [coal + gas + oil + nuclear + solar + wind + hydro + wave + tidal] * 31
+
     st.line_chart(df)
