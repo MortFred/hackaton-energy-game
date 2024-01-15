@@ -1,7 +1,7 @@
 import math
 
-class Generation:
-    def __init__(self, const=100, range_=10, peak_time = 0, time_delta=10):
+class BaseGenerator:
+    def __init__(self, co2_rate=100, nok_rate=100, time_delta=10):
         """
         Initialise values for sinusoidal generator
             Parameters:
@@ -10,18 +10,12 @@ class Generation:
                     peak_time (float, int): Time of day that peak generation occurs [mins]
                     time_delta (float, int): Time between increments [mins]
         """
-        # generation constants for sine shaped generation curve
-        self.const = const
-        self.range = range_
-        self.peak_time = peak_time
-
         # time constants
         self.time_delta = time_delta
 
-        # calculate daily profile
-        self.power = {}
-        for i in range(math.ceil(24*60/self.time_delta)+1):
-            self.power[self.time_delta*i] = self.const+ self.range*math.cos((self.time_delta*i-self.peak_time)/(60*24)*(2*math.pi))
+        # cost rates
+        self.co2_rate = co2_rate
+        self.nok_rate = nok_rate
 
     def get_power(self, time=None):
         """
@@ -34,3 +28,22 @@ class Generation:
         # return generation for current time
         power = self.power[time] if time else self.power
         return power
+    
+
+class SolarGenerator(BaseGenerator):
+    def __init__(self, co2_rate=100, nok_rate=100, time_delta=10, const = 100, range_ = 10, peak_time = 4*60):
+        super().__init__(co2_rate, nok_rate, time_delta)
+
+        # technology specific constants
+        self.const = const
+        self.range = range_
+        self.peak_time = peak_time
+
+        # claculate power profile
+        self.calculate_power_profile()
+
+    def calculate_power_profile(self):
+        # calculate daily profile
+        self.power = {}
+        for i in range(math.ceil(24*60/self.time_delta)+1):
+            self.power[self.time_delta*i] = self.const+ self.range*math.cos((self.time_delta*i-self.peak_time)/(60*24)*(2*math.pi))
