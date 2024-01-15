@@ -1,13 +1,14 @@
 import math
 
+from scipy.stats import norm
+
 class BaseGenerator:
     def __init__(self, co2_rate=100, nok_rate=100, time_delta=10):
         """
         Initialise values for sinusoidal generator
             Parameters:
-                    const (float, int): Baseline output across day [W]
-                    range_ (float, int): Deviation either side of output across day [W]
-                    peak_time (float, int): Time of day that peak generation occurs [mins]
+                    co2_rate (float, int): CO2e per unit energy [kg/J]
+                    nok_rate (float, int): NOK per unit energy [NOK/J]
                     time_delta (float, int): Time between increments [mins]
         """
         # time constants
@@ -31,11 +32,18 @@ class BaseGenerator:
     
 
 class SolarGenerator(BaseGenerator):
-    def __init__(self, co2_rate=100, nok_rate=100, time_delta=10, const = 100, range_ = 10, peak_time = 4*60):
+    def __init__(self, co2_rate=100, nok_rate=100, time_delta=10, peak_value = 100, range_ = 12*60, peak_time = 12*60):
         super().__init__(co2_rate, nok_rate, time_delta)
+        """
+        Initialise technology specific values
+            Parameters:
+                    peak_value (float, int): Peak generation power output [W]
+                    range_ (float, int): Duration of sunlight [mins]
+                    peak_time (float, int): Time of day that peak generation occurs [mins]
+        """
 
         # technology specific constants
-        self.const = const
+        self.peak_value = peak_value
         self.range = range_
         self.peak_time = peak_time
 
@@ -46,4 +54,5 @@ class SolarGenerator(BaseGenerator):
         # calculate daily profile
         self.power = {}
         for i in range(math.ceil(24*60/self.time_delta)+1):
-            self.power[self.time_delta*i] = self.const+ self.range*math.cos((self.time_delta*i-self.peak_time)/(60*24)*(2*math.pi))
+            self.power[self.time_delta*i] = norm.pdf(self.time_delta*i, 12*60, self.range/2/3)
+        self.power = {k:v/max(self.power.values())*self.peak_value for k,v in self.power.items()}
