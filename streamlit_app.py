@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
 
+import numpy as np
+
+from data.get_demand_curve import get_demand_curve
+
 st.header('hackathon-energy-game')
 
 with st.sidebar:
@@ -36,3 +40,15 @@ if button_display:
     df['_total'] = [coal + gas + oil + nuclear + solar + wind + hydro + wave + tidal] * 31
 
     st.line_chart(df)
+
+demand_curve = get_demand_curve()
+
+with st.empty():
+    t, demand = get_demand_curve()
+    df = pd.DataFrame({"t": t, "demand": demand})
+    df["demand"] = np.nan
+    df = df.set_index("t")
+    for seconds in range(len(demand)):
+        df["demand"].iloc[0:seconds] = demand[0:seconds]
+        st.line_chart(df)
+    st.write("✔️ 1 minute over!")
