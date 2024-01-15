@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+from generation import Generation
+import altair as alt
 
 import numpy as np
 
@@ -26,20 +28,62 @@ with st.sidebar:
     button_display = st.button('Display curves')
 
 if button_display:
+    days = 145
     df = pd.DataFrame()
-    df['coal'] = [coal] * 31
-    df['gas'] = [gas] * 31
-    df['oil'] = [oil] * 31
-    df['nuclear'] = [nuclear] * 31
-    df['solar'] = [solar] * 31
-    df['wind'] = [wind] * 31
-    df['hydro'] = [hydro] * 31
-    df['wave'] = [wave] * 31
-    df['tidal'] = [tidal] * 31
+    df['coal'] = [coal] * days
+    df['gas'] = [gas] * days
+    df['oil'] = [oil] * days
+    df['nuclear'] = [nuclear] * days
+    df['solar'] = [solar] * days
+    df['wind'] = [wind] * days
+    df['hydro'] = [hydro] * days
+    df['wave'] = [wave] * days
+    df['tidal'] = [tidal] * days
 
-    df['_total'] = [coal + gas + oil + nuclear + solar + wind + hydro + wave + tidal] * 31
+    df['_total'] = [coal + gas + oil + nuclear + solar + wind + hydro + wave + tidal] * days
 
-    st.line_chart(df)
+    generation_coal = Generation(range_=0).get_power()
+    generation_gas = Generation(range_=10).get_power()
+    generation_oil = Generation(range_=20).get_power()
+    generation_nuclear = Generation(range_=30).get_power()
+    generation_solar = Generation(range_=40).get_power()
+    generation_wind = Generation(range_=50).get_power()
+    generation_hydro = Generation(range_=60).get_power()
+    generation_wave = Generation(range_=70).get_power()
+    generation_tidal = Generation(range_=80).get_power()
+
+    df['labels'] = [int(k)/10 for k in generation_coal.keys()]
+
+    df['demand_coal'] = generation_coal.values()
+    df['demand_gas'] = generation_gas.values()
+    df['demand_oil'] = generation_oil.values()
+    df['demand_nuclear'] = generation_nuclear.values()
+    df['demand_solar'] = generation_solar.values()
+    df['demand_wind'] = generation_wind.values()
+    df['demand_hydro'] = generation_hydro.values()
+    df['demand_wave'] = generation_wave.values()
+    df['demand_tidal'] = generation_tidal.values()
+
+    df = df.set_index('labels')
+
+    st.altair_chart(
+        alt.Chart(
+            pd.melt(
+                df.reset_index(),
+                id_vars=["labels"]
+            ),
+                width=640, height=480
+        )
+        .mark_area()
+        .encode(
+            alt.X("labels", title=""),
+            alt.Y("value", title="", stack=True),
+            alt.Color("variable", title="", type="nominal"),
+            opacity={"value": 0.7},
+            # tooltip=["index", "value", "variable"]
+        ).interactive()
+    )
+
 
 demand_curve = get_demand_curve()
 
