@@ -4,6 +4,7 @@ from generation import Generation
 import altair as alt
 
 import numpy as np
+from classes.generation import Generation
 
 from data.get_demand_curve import get_demand_curve
 
@@ -86,13 +87,19 @@ if button_display:
 
 
 demand_curve = get_demand_curve()
+gen = Generation()
 
 with st.empty():
-    t, demand = get_demand_curve()
-    df = pd.DataFrame({"t": t, "demand": demand})
+    df = get_demand_curve()
+    df_gen = gen.get_power()
+    demand = df["demand"]
+    generation = df_gen["power"]
     df["demand"] = np.nan
+    df["generation"] = np.nan
     df = df.set_index("t")
+    df_gen = df_gen.set_index("t")
     for seconds in range(len(demand)):
         df["demand"].iloc[0:seconds] = demand[0:seconds]
-        st.line_chart(df)
+        df["generation"].iloc[0:seconds] = generation[0:seconds]
+        st.line_chart(df, df_gen)
     st.write("✔️ 1 minute over!")

@@ -1,4 +1,6 @@
 import math
+import numpy as np
+import pandas as pd
 
 class BaseGenerator:
     def __init__(self, co2_rate=100, nok_rate=100, time_delta=10):
