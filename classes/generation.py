@@ -53,3 +53,27 @@ class SolarGenerator(BaseGenerator):
         for i in range(math.ceil(24*60/self.time_delta)+1):
             self.power[self.time_delta*i] = norm.pdf(self.time_delta*i, 12*60, self.range/2/3)
         self.power = {k:v/max(self.power.values())*self.peak_value for k,v in self.power.items()}
+
+class NuclearGenerator(BaseGenerator):
+    def __init__(self, co2_rate=100, nok_rate=100, time_delta=10, peak_value = 100):
+        super().__init__(co2_rate, nok_rate, time_delta)
+        """
+        Initialise technology specific values
+            Parameters:
+                    peak_value (float, int): Peak generation power output [W]
+                    range_ (float, int): Duration of sunlight [mins]
+                    peak_time (float, int): Time of day that peak generation occurs [mins]
+        """
+
+        # technology specific constants
+        self.peak_value = peak_value
+
+        # claculate values
+        self.calculate_power_profile()
+        self.calculate_costs()
+
+    def calculate_power_profile(self):
+        # calculate daily power profile
+        self.power = {}
+        for i in range(math.ceil(24*60/self.time_delta)+1):
+            self.power[self.time_delta*i] = self.peak_value
