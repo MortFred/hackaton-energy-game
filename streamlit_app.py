@@ -1,9 +1,7 @@
-# pip install streamlit
-# streamlit run streamlit_app.py
-
 import streamlit as st
+import pandas as pd
 
-st.header('hackaton-energy-game')
+st.header('hackathon-energy-game')
 
 with st.sidebar:
     st.subheader('Initial game parameters')
@@ -21,4 +19,18 @@ with st.sidebar:
     wave = st.slider('Wave', 0, 100)
     tidal = st.slider('Tidal', 0, 100)
 
-    st.button('Display curves')
+    button_display = st.button('Display curves')
+
+if button_display:
+    df = pd.DataFrame()
+    df['coal'] = [coal] * 31
+    df['gas'] = [gas] * 31
+    df['oil'] = [oil] * 31
+    df['nuclear'] = [nuclear] * 31
+    df['solar'] = [solar] * 31
+    df['wind'] = [wind] * 31
+    df['hydro'] = [hydro] * 31
+    df['wave'] = [wave] * 31
+    df['tidal'] = [tidal] * 31
+
+    st.line_chart(df)
