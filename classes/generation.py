@@ -1,8 +1,7 @@
 import math
-import numpy as np
-import pandas as pd
 
 from scipy.stats import norm
+
 
 class BaseGenerator:
     def __init__(self, co2_opex=100, nok_opex=100, nok_capex=100, min_output=1., time_delta=10):
@@ -103,6 +102,3 @@ class NuclearGenerator(BaseGenerator):
         self.max_power = {}
         for i in range(math.ceil(24*60/self.time_delta)+1):
             self.max_power[self.time_delta*i] = self.peak_value
-
-# scale based on installed capacity
-# extend to a week
