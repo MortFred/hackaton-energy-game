@@ -5,6 +5,11 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
+# convert units to SI - https://atb.nrel.gov/electricity/2022/index
+USD_KWY = 10.42 / (1e3 * 365.25 * 24 * 3600)
+USD_KW = 10.42 / (1e3)
+GRAM_MWH = 0.001 / (1e6 * 3600)
+
 
 class BaseGenerator:
     def __init__(
@@ -64,9 +69,9 @@ class SolarGenerator(BaseGenerator):
         self,
         time_steps,
         installed_capacity,
-        co2_opex=100,
-        nok_opex=100,
-        nok_capex=100,
+        co2_opex=41000 * GRAM_MWH,
+        nok_opex=19 * USD_KWY,
+        nok_capex=1784 * USD_KW,
         min_output=1.0,
         range_=12,
         peak_time=12,
@@ -116,9 +121,9 @@ class NuclearGenerator(BaseGenerator):
         self,
         time_steps,
         installed_capacity,
-        co2_opex=100,
-        nok_opex=100,
-        nok_capex=100,
+        co2_opex=24000 * GRAM_MWH,
+        nok_opex=(146 + 114) / 2 * USD_KWY,
+        nok_capex=(7989 + 7442) / 2 * USD_KW,
         min_output=1.0,
     ):
         super().__init__(
@@ -151,9 +156,9 @@ class WindGenerator(BaseGenerator):
         self,
         time_steps,
         installed_capacity,
-        co2_opex=100,
-        nok_opex=100,
-        nok_capex=100,
+        co2_opex=11000 * GRAM_MWH,
+        nok_opex=(116 + 75) / 2 * USD_KWY,
+        nok_capex=(5908 + 3285) / 2 * USD_KW,
         min_output=1.0,
     ):
         super().__init__(
@@ -198,9 +203,9 @@ class OilGenerator(BaseGenerator):
         self,
         time_steps,
         installed_capacity,
-        co2_opex=100,
-        nok_opex=100,
-        nok_capex=100,
+        co2_opex=780_000 * GRAM_MWH,
+        nok_opex=(141 + 74) / 2 * USD_KWY * 1.15,
+        nok_capex=(5327 + 3075) / 2 * USD_KW * 1.15,
         min_output=0.1,
     ):
         super().__init__(
@@ -233,9 +238,9 @@ class CoalGenerator(BaseGenerator):
         self,
         time_steps,
         installed_capacity,
-        co2_opex=100,
-        nok_opex=100,
-        nok_capex=100,
+        co2_opex=980_000 * GRAM_MWH,
+        nok_opex=(141 + 74) / 2 * USD_KWY,
+        nok_capex=(5327 + 3075) / 2 * USD_KW,
         min_output=0.32,
     ):
         super().__init__(
@@ -268,9 +273,9 @@ class GasGenerator(BaseGenerator):
         self,
         time_steps,
         installed_capacity,
-        co2_opex=100,
-        nok_opex=100,
-        nok_capex=100,
+        co2_opex=430_000 * GRAM_MWH,
+        nok_opex=(59 + 21) / 2 * USD_KWY,
+        nok_capex=(2324 + 922) / 2 * USD_KW,
         min_output=0.35,
     ):
         super().__init__(
