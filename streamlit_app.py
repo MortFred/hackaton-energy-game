@@ -1,10 +1,9 @@
 import streamlit as st
 import pandas as pd
-from generation import Generation
 import altair as alt
 
 import numpy as np
-from classes.generation import Generation
+from classes.generation import SolarGenerator
 
 from data.get_demand_curve import get_demand_curve
 
@@ -29,77 +28,58 @@ with st.sidebar:
     button_display = st.button('Display curves')
 
 if button_display:
-    days = 145
     df = pd.DataFrame()
-    df['coal'] = [coal] * days
-    df['gas'] = [gas] * days
-    df['oil'] = [oil] * days
-    df['nuclear'] = [nuclear] * days
-    df['solar'] = [solar] * days
-    df['wind'] = [wind] * days
-    df['hydro'] = [hydro] * days
-    df['wave'] = [wave] * days
-    df['tidal'] = [tidal] * days
+    
+    df_demand= get_demand_curve()
+    demand = df_demand["demand"]
+    t = np.linspace(0,24, 24*6)
+    df_prod = pd.DataFrame({"t": t})
+    generation_solar = list(SolarGenerator(const = 12000, range_=2000).get_power().values())
 
-    df['_total'] = [coal + gas + oil + nuclear + solar + wind + hydro + wave + tidal] * days
+    df_demand = df_demand.set_index('t')
+    df_prod = df_prod.set_index('t')
+    df_prod["solar"] = generation_solar
+    df_prod["generic"] = list(demand)
 
-    generation_coal = Generation(range_=0).get_power()
-    generation_gas = Generation(range_=10).get_power()
-    generation_oil = Generation(range_=20).get_power()
-    generation_nuclear = Generation(range_=30).get_power()
-    generation_solar = Generation(range_=40).get_power()
-    generation_wind = Generation(range_=50).get_power()
-    generation_hydro = Generation(range_=60).get_power()
-    generation_wave = Generation(range_=70).get_power()
-    generation_tidal = Generation(range_=80).get_power()
+    with st.empty():
+        df_demand["demand"] = np.nan
+        df_prod["generic"] = np.nan
+        df_prod["solar"] = np.nan
+        for seconds in range(len(demand)):
+            df_demand["demand"].iloc[0:seconds] = list(demand)[0:seconds]
+            df_prod["generic"].iloc[0:seconds] = list(demand)[0:seconds]
+            df_prod["solar"].iloc[0:seconds] = generation_solar[0:seconds]
+  
+            st.altair_chart(  
+                alt.layer(
 
-    df['labels'] = [int(k)/10 for k in generation_coal.keys()]
+                alt.Chart(
+                pd.melt(
+                    df_prod.reset_index(),
+                    id_vars=["t"]
+                ),
+                    width=640, height=480
+                )
+                .mark_area()
+                .encode(
+                    alt.X("t", title=""),
+                    alt.Y("value", title="", stack=True),
+                    alt.Color("variable", title="", type="nominal"),
+                    opacity={"value": 0.7},
+                    ).interactive(),
 
-    df['demand_coal'] = generation_coal.values()
-    df['demand_gas'] = generation_gas.values()
-    df['demand_oil'] = generation_oil.values()
-    df['demand_nuclear'] = generation_nuclear.values()
-    df['demand_solar'] = generation_solar.values()
-    df['demand_wind'] = generation_wind.values()
-    df['demand_hydro'] = generation_hydro.values()
-    df['demand_wave'] = generation_wave.values()
-    df['demand_tidal'] = generation_tidal.values()
-
-    df = df.set_index('labels')
-
-    st.altair_chart(
-        alt.Chart(
-            pd.melt(
-                df.reset_index(),
-                id_vars=["labels"]
-            ),
-                width=640, height=480
-        )
-        .mark_area()
-        .encode(
-            alt.X("labels", title=""),
-            alt.Y("value", title="", stack=True),
-            alt.Color("variable", title="", type="nominal"),
-            opacity={"value": 0.7},
-            # tooltip=["index", "value", "variable"]
-        ).interactive()
-    )
-
-
-demand_curve = get_demand_curve()
-gen = Generation()
-
-with st.empty():
-    df = get_demand_curve()
-    df_gen = gen.get_power()
-    demand = df["demand"]
-    generation = df_gen["power"]
-    df["demand"] = np.nan
-    df["generation"] = np.nan
-    df = df.set_index("t")
-    df_gen = df_gen.set_index("t")
-    for seconds in range(len(demand)):
-        df["demand"].iloc[0:seconds] = demand[0:seconds]
-        df["generation"].iloc[0:seconds] = generation[0:seconds]
-        st.line_chart(df, df_gen)
-    st.write("✔️ 1 minute over!")
+                alt.Chart(
+                pd.melt(
+                    df_demand.reset_index(),
+                    id_vars=["t"]
+                )
+                ).mark_line()
+                .encode(
+                    alt.X("t", title=""),
+                    alt.Y("value", title="", stack=True),
+                    alt.Color("variable", title="", type="nominal"),
+                    opacity={"value": 0.7},
+                    ).interactive()
+                )       
+            )
+            
