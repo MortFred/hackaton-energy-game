@@ -7,7 +7,9 @@ from scipy.stats import norm
 
 
 class BaseGenerator:
-    def __init__(self, co2_opex, nok_opex, nok_capex, min_output, time_steps):
+    def __init__(
+        self, installed_capacity, min_output, co2_opex, nok_opex, nok_capex, time_steps
+    ):
         """
         Initialise values for sinusoidal generator
             Parameters:
@@ -17,16 +19,17 @@ class BaseGenerator:
                 min_output (float): Proportion of available power that must be generated [-]
                 time_steps (list[float]): Time range [hours]
         """
-        # time constants
-        self.time_steps = time_steps
-
         # capcity constraints
+        self.installed_capacity = installed_capacity
         self.min_output = min_output
 
         # cost rates
         self.co2_opex = co2_opex
         self.nok_opex = nok_opex
         self.nok_capex = nok_capex
+
+        # time constants
+        self.time_steps = time_steps
 
     def calculate_min_power_profile(self):
         """
@@ -51,7 +54,7 @@ class BaseGenerator:
 
         # total costs
         co2 = power_total * self.co2_opex
-        nok = power_total * self.nok_opex + self.nok_capex
+        nok = power_total * self.nok_opex + self.installed_capacity * self.nok_capex
 
         return co2, nok
 
@@ -69,10 +72,11 @@ class SolarGenerator(BaseGenerator):
         peak_time=12,
     ):
         super().__init__(
+            installed_capacity=installed_capacity,
+            min_output=min_output,
             co2_opex=co2_opex,
             nok_opex=nok_opex,
             nok_capex=nok_capex,
-            min_output=min_output,
             time_steps=time_steps,
         )
         """
@@ -84,7 +88,6 @@ class SolarGenerator(BaseGenerator):
         """
 
         # technology specific constants
-        self.installed_capacity = installed_capacity
         self.range = range_
         self.peak_time = peak_time
         self.daily_capcity = np.random.uniform(0.6, 1, int(self.time_steps.max() / 24))
@@ -119,10 +122,11 @@ class NuclearGenerator(BaseGenerator):
         min_output=1.0,
     ):
         super().__init__(
+            installed_capacity=installed_capacity,
+            min_output=min_output,
             co2_opex=co2_opex,
             nok_opex=nok_opex,
             nok_capex=nok_capex,
-            min_output=min_output,
             time_steps=time_steps,
         )
         """
@@ -130,9 +134,6 @@ class NuclearGenerator(BaseGenerator):
             Parameters:
                 installed_capacity (float, int): Peak generation power output [W]
         """
-
-        # technology specific constants
-        self.installed_capacity = installed_capacity
 
         # calculate values
         self.calculate_max_power_profile()
@@ -156,10 +157,11 @@ class WindGenerator(BaseGenerator):
         min_output=1.0,
     ):
         super().__init__(
+            installed_capacity=installed_capacity,
+            min_output=min_output,
             co2_opex=co2_opex,
             nok_opex=nok_opex,
             nok_capex=nok_capex,
-            min_output=min_output,
             time_steps=time_steps,
         )
         """
@@ -167,9 +169,6 @@ class WindGenerator(BaseGenerator):
             Parameters:
                 installed_capacity (float, int): Peak generation power output [W]
         """
-
-        # technology specific constants
-        self.installed_capacity = installed_capacity
 
         # calculate values
         self.calculate_max_power_profile()
