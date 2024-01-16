@@ -2,6 +2,7 @@ import os
 import random
 
 import numpy as np
+import pandas as pd
 from scipy.stats import norm
 
 
@@ -142,3 +143,52 @@ class NuclearGenerator(BaseGenerator):
         self.max_power = {}
         for t in self.time_steps:
             self.max_power[t] = self.installed_capacity
+
+
+class WindGenerator(BaseGenerator):
+    def __init__(
+        self,
+        time_steps,
+        installed_capacity,
+        co2_opex=100,
+        nok_opex=100,
+        nok_capex=100,
+        min_output=1.0,
+    ):
+        super().__init__(
+            co2_opex=co2_opex,
+            nok_opex=nok_opex,
+            nok_capex=nok_capex,
+            min_output=min_output,
+            time_steps=time_steps,
+        )
+        """
+        Initialise technology specific values
+            Parameters:
+                installed_capacity (float, int): Peak generation power output [W]
+        """
+
+        # technology specific constants
+        self.installed_capacity = installed_capacity
+
+        # calculate values
+        self.calculate_max_power_profile()
+        self.calculate_min_power_profile()
+
+    def calculate_max_power_profile(self, seed=1250):
+        # set seed
+        random.seed(seed)
+
+        # laod data
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        wind = pd.read_csv(
+            dir_path
+            + "/../data/Solar_and_WindOnOffshore__watt_produced_per_watt_installed.csv"
+        )
+        offset = random.randrange(0, len(wind) - 168, 24)
+
+        # calculate daily power profile
+        self.max_power = (
+            wind["offshoreWind"].iloc[offset + 0 : offset + 168]
+            * self.installed_capacity
+        ).to_dict()
