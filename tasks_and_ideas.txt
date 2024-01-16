@@ -1,6 +1,7 @@
 Tasks
 
 - change sliders to capacity input: " xxx GW installed" and as output "~ # of plants"
+    (List of MW per Plant will be provided. As first values: 2GW per nuclear plant, 4MW per wind turbine onshore, 8MW per wind turbine offshore)
 
 - Simulating per time step: Add all possible energy capacities up (100% of the fossil capacities and x% of the renewables according to the time series) and then cut down to minimum load according to the priority. Starting from the cutting down: 1 Oil, 2 Coal, 3 Gas, 4 Wind, 5 Hydro, 6 Solar, Nuclear is uncuttable)
 
@@ -12,6 +13,6 @@ Scaling:
 - Cost scaling: Interpolate the score with cost_per_MWh = overall_cost / overall_MWh_produced for 300€ per MWh is a 0% and 50€ per MWh is a 100% score.
 
 - For CO2-Emissions: total_emissions = C02_emissions_per_MWh * MWh_produced for each power plant, added for each time step. 
-   the CO2-score is 
+   the CO2-score is in a list that scores Co2_per_MWh_produced = total_emissions/overall MWh_produced
 
 - Stability: Per time step 100% security is if the possible_production_MW is >=15% of the overall_maximum_demand_MW on top of the current_demand_MW. 0% is if possible_production_MW is <= current_demand_MW. For the score, all percentages are multiplied together, so that always having +15% possible capacity is 100% overall security and having an underproduction at one point (alias Black-out) is 0%.
