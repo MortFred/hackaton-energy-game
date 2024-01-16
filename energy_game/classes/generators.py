@@ -1,4 +1,5 @@
-import math
+import os
+import random
 
 import numpy as np
 from scipy.stats import norm
@@ -96,7 +97,12 @@ class SolarGenerator(BaseGenerator):
         max_power = np.zeros_like(self.time_steps)
         for day in range(int(self.time_steps.max() / 24)):
             day_power = norm.pdf(self.time_steps, (day + 0.5) * 24, self.range / 2 / 3)
-            day_power = day_power / day_power.max() * self.daily_capcity[day]
+            day_power = (
+                day_power
+                / day_power.max()
+                * self.daily_capcity[day]
+                * self.installed_capacity
+            )
             max_power = max_power + day_power
         self.max_power = {k: v for k, v in zip(self.time_steps, max_power)}
 
@@ -122,8 +128,6 @@ class NuclearGenerator(BaseGenerator):
         Initialise technology specific values
             Parameters:
                 installed_capacity (float, int): Peak generation power output [W]
-                range_ (float, int): Duration of sunlight [mins]
-                peak_time (float, int): Time of day that peak generation occurs [mins]
         """
 
         # technology specific constants
