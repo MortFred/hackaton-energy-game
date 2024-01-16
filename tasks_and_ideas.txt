@@ -6,4 +6,5 @@ Tasks
 
 - Weeks chosen: 4 representative weeks? Calculate the score first of all for these 4 weeks and eventually extend the internal calculation later on to a year (but still just show 4 weeks).
 
-- For costs
+- For costs: Overall cost = CAPEX/W * Capacity installed + OPEX/Wh * Wh produced (<- adding all sources)
+              Cost file will be provided
