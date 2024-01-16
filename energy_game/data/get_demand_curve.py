@@ -13,4 +13,3 @@ def get_demand_curve():
     return pd.DataFrame({"t": t, "demand": demand})
 
 
-get_demand_curve()
