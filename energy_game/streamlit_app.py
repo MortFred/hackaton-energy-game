@@ -4,9 +4,9 @@ import pandas as pd
 import altair as alt
 
 import numpy as np
-from classes.generators import SolarGenerator, WindGenerator
 from data.get_demand_curve import get_demand_curve
 from calculate_production import calculate_production
+from energy_game.classes.generators import SolarGenerator, WindGenerator
 
 st.header("Energy Grid Game")
 
@@ -14,6 +14,7 @@ df_demand = get_demand_curve()
 max_demand = max(df_demand["demand"])
 coal = 0
 gas = 0
+oil = 0
 nuclear = 0
 solar = 0
 wind = 0
@@ -24,6 +25,7 @@ with st.sidebar:
     st.subheader("Energy Mix")
     coal = st.number_input("Coal (MW)", value=coal)
     gas = st.number_input("Gas (MW)", value=gas)
+    oil = st.number_input("Oil (MW)", value=oil)
     nuclear = st.number_input("Nuclear (MW)", value=nuclear)
     solar = st.number_input("Solar (MW)", value=solar)
     wind = st.number_input("Wind (MW)", value=wind)
@@ -37,7 +39,6 @@ with st.sidebar:
 
     button_display = st.button("Run Simulation")
 
-# if button_display:
 demand = df_demand["demand"]
 t = np.linspace(0, 24 * 7, 24 * 7)
 df_prod = pd.DataFrame({"t": t})
@@ -55,7 +56,8 @@ df_prod = df_prod.set_index("t")
 df_prod["wind"] = generation_wind
 df_prod["solar"] = generation_solar
 solar_gen = ENERGY_PRODUCERS["solar"]
-df_prod = calculate_production(solar=solar, wind=wind)
+df_demand = df_demand.set_index("t")
+df_prod = calculate_production(solar=solar, wind=wind, nuclear=nuclear, oil=oil)
 
 cont1 = st.container()
 with cont1:
@@ -73,17 +75,21 @@ with col3:
 with st.empty():
     df_demand["demand"] = np.nan
     output = df_prod.copy()
-    output["solar"] = np.nan
+    output["nuclear"] = np.nan
+    output["oil"] = np.nan
     output["wind"] = np.nan
+    output["solar"] = np.nan
     for hour in range(0, len(demand), 3):
         df_demand["demand"].iloc[0:hour] = list(demand)[0:hour]
         output["solar"].iloc[0:hour] = df_prod["solar"].iloc[0:hour]
         output["wind"].iloc[0:hour] = df_prod["wind"].iloc[0:hour]
+        output["oil"].iloc[0:hour] = df_prod["oil"].iloc[0:hour]
+        output["nuclear"].iloc[0:hour] = df_prod["nuclear"].iloc[0:hour]
 
         st.altair_chart(
             alt.layer(
                 alt.Chart(
-                    pd.melt(df_prod.reset_index(), id_vars=["t"]),
+                    pd.melt(output.reset_index(), id_vars=["t"]),
                     width=640,
                     height=480,
                 )
