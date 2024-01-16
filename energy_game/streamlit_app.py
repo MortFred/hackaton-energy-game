@@ -42,18 +42,20 @@ df = pd.DataFrame()
 demand = df_demand["demand"]
 t = np.linspace(0, 24 * 7, 24 * 7)
 df_prod = pd.DataFrame({"t": t})
-generation_solar = list(
-    SolarGenerator(time_steps=t, installed_capacity=solar).max_power.values()
-)
-generation_wind = list(
-    WindGenerator(time_steps=t, installed_capacity=wind).max_power.values()
-)
+
+ENERGY_PRODUCERS = {
+    "solar": SolarGenerator(time_steps=t, installed_capacity=solar),
+    "wind": WindGenerator(time_steps=t, installed_capacity=wind),
+}
+
+generation_solar = list(ENERGY_PRODUCERS["solar"].max_power.values())
+generation_wind = list(ENERGY_PRODUCERS["wind"].max_power.values())
 
 df_demand = df_demand.set_index("t")
 df_prod = df_prod.set_index("t")
-df_prod["wind"] = wind
+df_prod["wind"] = generation_wind
 df_prod["solar"] = generation_solar
-
+solar_gen = ENERGY_PRODUCERS["solar"]
 cont1 = st.container()
 with cont1:
     col1, col2, col3 = st.columns(3)
