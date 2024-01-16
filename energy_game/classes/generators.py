@@ -191,3 +191,108 @@ class WindGenerator(BaseGenerator):
             wind["offshoreWind"].iloc[offset + 0 : offset + 168]
             * self.installed_capacity
         ).to_dict()
+
+
+class OilGenerator(BaseGenerator):
+    def __init__(
+        self,
+        time_steps,
+        installed_capacity,
+        co2_opex=100,
+        nok_opex=100,
+        nok_capex=100,
+        min_output=0.1,
+    ):
+        super().__init__(
+            installed_capacity=installed_capacity,
+            min_output=min_output,
+            co2_opex=co2_opex,
+            nok_opex=nok_opex,
+            nok_capex=nok_capex,
+            time_steps=time_steps,
+        )
+        """
+        Initialise technology specific values
+            Parameters:
+                installed_capacity (float, int): Peak generation power output [W]
+        """
+
+        # calculate values
+        self.calculate_max_power_profile()
+        self.calculate_min_power_profile()
+
+    def calculate_max_power_profile(self):
+        # calculate daily power profile
+        self.max_power = {}
+        for t in self.time_steps:
+            self.max_power[t] = self.installed_capacity
+
+
+class CoalGenerator(BaseGenerator):
+    def __init__(
+        self,
+        time_steps,
+        installed_capacity,
+        co2_opex=100,
+        nok_opex=100,
+        nok_capex=100,
+        min_output=0.32,
+    ):
+        super().__init__(
+            installed_capacity=installed_capacity,
+            min_output=min_output,
+            co2_opex=co2_opex,
+            nok_opex=nok_opex,
+            nok_capex=nok_capex,
+            time_steps=time_steps,
+        )
+        """
+        Initialise technology specific values
+            Parameters:
+                installed_capacity (float, int): Peak generation power output [W]
+        """
+
+        # calculate values
+        self.calculate_max_power_profile()
+        self.calculate_min_power_profile()
+
+    def calculate_max_power_profile(self):
+        # calculate daily power profile
+        self.max_power = {}
+        for t in self.time_steps:
+            self.max_power[t] = self.installed_capacity
+
+
+class GasGenerator(BaseGenerator):
+    def __init__(
+        self,
+        time_steps,
+        installed_capacity,
+        co2_opex=100,
+        nok_opex=100,
+        nok_capex=100,
+        min_output=0.35,
+    ):
+        super().__init__(
+            installed_capacity=installed_capacity,
+            min_output=min_output,
+            co2_opex=co2_opex,
+            nok_opex=nok_opex,
+            nok_capex=nok_capex,
+            time_steps=time_steps,
+        )
+        """
+        Initialise technology specific values
+            Parameters:
+                installed_capacity (float, int): Peak generation power output [W]
+        """
+
+        # calculate values
+        self.calculate_max_power_profile()
+        self.calculate_min_power_profile()
+
+    def calculate_max_power_profile(self):
+        # calculate daily power profile
+        self.max_power = {}
+        for t in self.time_steps:
+            self.max_power[t] = self.installed_capacity
