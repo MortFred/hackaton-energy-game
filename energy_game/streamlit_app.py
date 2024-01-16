@@ -5,7 +5,6 @@ import altair as alt
 
 import numpy as np
 from energy_game.classes.generators import SolarGenerator
-
 from energy_game.data.get_demand_curve import get_demand_curve
 
 st.header("Energy Grid Game")
@@ -43,7 +42,7 @@ df = pd.DataFrame()
 demand = df_demand["demand"]
 t = np.linspace(0, 24, 24 * 7)
 df_prod = pd.DataFrame({"t": t})
-generation_solar = list(SolarGenerator(peak_value=12000).max_power.values())
+generation_solar = list(SolarGenerator(time_steps=t, peak_value=12000).max_power.values())
 
 df_demand = df_demand.set_index("t")
 df_prod = df_prod.set_index("t")

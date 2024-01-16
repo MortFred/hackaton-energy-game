@@ -1,10 +1,11 @@
 import math
 
+import numpy as np
 from scipy.stats import norm
 
 
 class BaseGenerator:
-    def __init__(self, co2_opex=100, nok_opex=100, nok_capex=100, min_output=1., time_delta=10):
+    def __init__(self, co2_opex, nok_opex, nok_capex, min_output, time_steps):
         """
         Initialise values for sinusoidal generator
             Parameters:
@@ -12,10 +13,10 @@ class BaseGenerator:
                 nok_opex (float, int): NOK per unit energy [NOK/J]
                 nok_capex (float, int): NOK per installed capacity [NOK/W]
                 min_output (float): Proportion of available power that must be generated [-]
-                time_delta (float, int): Time between increments [mins]
+                time_steps (list[float]): Time range [hours]
         """
         # time constants
-        self.time_delta = time_delta
+        self.time_steps = time_steps
 
         # capcity constraints
         self.min_output = min_output
@@ -43,7 +44,10 @@ class BaseGenerator:
                 nok (float): total NOK spent [NOK]
         """
         # total power generated
-        power_total = sum(power)*self.time_delta*60
+        time_step = list(set(np.diff(self.time_steps).round(8)))
+        assert len(time_step) == 1
+        time_step = time_step[0]
+        power_total = sum(power)*time_step*3600
 
         # total costs
         co2 = power_total*self.co2_opex
@@ -53,8 +57,8 @@ class BaseGenerator:
 
 
 class SolarGenerator(BaseGenerator):
-    def __init__(self, co2_opex=100, nok_opex=100, nok_capex=100, min_output=1., time_delta=10, peak_value = 100, range_ = 12*60, peak_time = 12*60):
-        super().__init__(co2_opex, nok_opex, nok_capex, min_output, time_delta)
+    def __init__(self, time_steps, co2_opex=100, nok_opex=100, nok_capex=100, min_output=1., peak_value = 100, range_ = 12, peak_time = 12):
+        super().__init__(co2_opex=co2_opex, nok_opex=nok_opex, nok_capex=nok_capex, min_output=min_output, time_steps=time_steps)
         """
         Initialise technology specific values
             Parameters:
@@ -75,13 +79,13 @@ class SolarGenerator(BaseGenerator):
     def calculate_max_power_profile(self):
         # calculate daily power profile
         self.max_power = {}
-        for i in range(math.ceil(24*60/self.time_delta)):
-            self.max_power[self.time_delta*i] = norm.pdf(self.time_delta*i, 12*60, self.range/2/3)
+        for t in self.time_steps:
+            self.max_power[t] = norm.pdf(t, 12, self.range/2/3)
         self.max_power = {k:v/max(self.max_power.values())*self.peak_value for k,v in self.max_power.items()}
 
 class NuclearGenerator(BaseGenerator):
-    def __init__(self, co2_opex=100, nok_opex=100, nok_capex=100, min_output=1., time_delta=10, peak_value = 100):
-        super().__init__(co2_opex, nok_opex, nok_capex, min_output, time_delta)
+    def __init__(self, time_steps, co2_opex=100, nok_opex=100, nok_capex=100, min_output=1., peak_value = 100):
+        super().__init__(co2_opex=co2_opex, nok_opex=nok_opex, nok_capex=nok_capex, min_output=min_output, time_steps=time_steps)
         """
         Initialise technology specific values
             Parameters:
@@ -100,5 +104,5 @@ class NuclearGenerator(BaseGenerator):
     def calculate_max_power_profile(self):
         # calculate daily power profile
         self.max_power = {}
-        for i in range(math.ceil(24*60/self.time_delta)):
-            self.max_power[self.time_delta*i] = self.peak_value
+        for t in self.time_steps:
+            self.max_power[t] = self.peak_value
