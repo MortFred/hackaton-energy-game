@@ -43,24 +43,39 @@ df = pd.DataFrame()
 demand = df_demand["demand"]
 t = np.linspace(0, 24 * 7, 24 * 7)
 df_prod = pd.DataFrame({"t": t})
-generation_solar = list(
-    SolarGenerator(time_steps=t, installed_capacity=solar).max_power.values()
-)
-generation_wind = list(WindGenerator(peak_value=wind).max_power)
+solar_gen = SolarGenerator(time_steps=t, installed_capacity=solar)
+wind_gen = WindGenerator(peak_value=wind)
+generation_solar = list(solar_gen.max_power.values())
+generation_wind = list(wind_gen.max_power)
 
 df_demand = df_demand.set_index("t")
 df_prod = df_prod.set_index("t")
 df_prod["wind"] = wind
 df_prod["solar"] = generation_solar
 
+cont1 = st.container()
+with cont1:
+    col1, col2, col3 = st.columns(3)
+cont2 = st.container()
+
+solar_total_produced = sum(df_prod["solar"])
+with col1:
+    st.write(
+        f"Price score: {solar_gen.nok_capex*solar_gen.installed_capacity + solar_gen.nok_opex*solar_total_produced:9.0f}"
+    )
+with col2:
+    st.write(f"CO2 score: {solar_gen.co2_opex*solar_total_produced:9.0f}")
+with col3:
+    st.write(f"Stability score: {100}")
+
 with st.empty():
     df_demand["demand"] = np.nan
     df_prod["solar"] = np.nan
     df_prod["wind"] = np.nan
-    for seconds in range(0, len(demand), 3):
-        df_demand["demand"].iloc[0:seconds] = list(demand)[0:seconds]
-        df_prod["solar"].iloc[0:seconds] = generation_solar[0:seconds]
-        df_prod["wind"].iloc[0:seconds] = generation_wind[0:seconds]
+    for hour in range(0, len(demand), 3):
+        df_demand["demand"].iloc[0:hour] = list(demand)[0:hour]
+        df_prod["solar"].iloc[0:hour] = generation_solar[0:hour]
+        df_prod["wind"].iloc[0:hour] = generation_wind[0:hour]
 
         st.altair_chart(
             alt.layer(
