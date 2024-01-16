@@ -9,6 +9,7 @@ from scipy.stats import norm
 USD_KWY = 10.42 / (1e3 * 365.25 * 24 * 3600)
 USD_KW = 10.42 / (1e3)
 GRAM_MWH = 0.001 / (1e6 * 3600)
+CARBON_TAX = 11.34 * (76 + 80) / 1000
 
 
 class BaseGenerator:
@@ -20,7 +21,7 @@ class BaseGenerator:
             Parameters:
                 co2_opex (float, int): CO2e per unit energy [kg/J]
                 nok_opex (float, int): NOK per unit energy [NOK/J]
-                nok_capex (float, int): NOK per installed capacity [NOK/W]
+                nok_capex (float, int): NOK per installed capacity [NOK/W/WEEK]
                 min_output (float): Proportion of available power that must be generated [-]
                 time_steps (list[float]): Time range [hours]
         """
@@ -55,11 +56,16 @@ class BaseGenerator:
         time_step = list(set(np.diff(self.time_steps).round(8)))
         assert len(time_step) == 1
         time_step = time_step[0]
-        power_total = sum(power) * time_step * 3600
+        energy_total = sum(power) * time_step * 3600
 
         # total costs
-        co2 = power_total * self.co2_opex
-        nok = power_total * self.nok_opex + self.installed_capacity * self.nok_capex
+        co2 = energy_total * self.co2_opex
+        carbon_tax = co2 * CARBON_TAX if self.carbon_tax else 0
+        nok = (
+            energy_total * self.nok_opex
+            + self.installed_capacity * self.nok_capex
+            + carbon_tax
+        )
 
         return co2, nok
 
@@ -71,7 +77,7 @@ class SolarGenerator(BaseGenerator):
         installed_capacity,
         co2_opex=41000 * GRAM_MWH,
         nok_opex=19 * USD_KWY,
-        nok_capex=1784 * USD_KW,
+        nok_capex=1784 * USD_KW / 30 / 52,
         min_output=1.0,
         range_=12,
         peak_time=12,
@@ -96,6 +102,7 @@ class SolarGenerator(BaseGenerator):
         self.range = range_
         self.peak_time = peak_time
         self.daily_capcity = np.random.uniform(0.6, 1, int(self.time_steps.max() / 24))
+        self.carbon_tax = False
 
         # calculate values
         self.calculate_max_power_profile()
@@ -123,7 +130,7 @@ class NuclearGenerator(BaseGenerator):
         installed_capacity,
         co2_opex=24000 * GRAM_MWH,
         nok_opex=(146 + 114) / 2 * USD_KWY,
-        nok_capex=(7989 + 7442) / 2 * USD_KW,
+        nok_capex=(7989 + 7442) / 2 * USD_KW / 50 / 52,
         min_output=1.0,
     ):
         super().__init__(
@@ -139,6 +146,9 @@ class NuclearGenerator(BaseGenerator):
             Parameters:
                 installed_capacity (float, int): Peak generation power output [W]
         """
+
+        # technology specific constants
+        self.carbon_tax = False
 
         # calculate values
         self.calculate_max_power_profile()
@@ -158,7 +168,7 @@ class WindGenerator(BaseGenerator):
         installed_capacity,
         co2_opex=11000 * GRAM_MWH,
         nok_opex=(116 + 75) / 2 * USD_KWY,
-        nok_capex=(5908 + 3285) / 2 * USD_KW,
+        nok_capex=(5908 + 3285) / 2 * USD_KW / 25 / 52,
         min_output=1.0,
     ):
         super().__init__(
@@ -174,6 +184,9 @@ class WindGenerator(BaseGenerator):
             Parameters:
                 installed_capacity (float, int): Peak generation power output [W]
         """
+
+        # technology specific constants
+        self.carbon_tax = False
 
         # calculate values
         self.calculate_max_power_profile()
@@ -205,7 +218,7 @@ class OilGenerator(BaseGenerator):
         installed_capacity,
         co2_opex=780_000 * GRAM_MWH,
         nok_opex=(141 + 74) / 2 * USD_KWY * 1.15,
-        nok_capex=(5327 + 3075) / 2 * USD_KW * 1.15,
+        nok_capex=(5327 + 3075) / 2 * USD_KW * 1.15 / 40 / 52,
         min_output=0.1,
     ):
         super().__init__(
@@ -221,6 +234,9 @@ class OilGenerator(BaseGenerator):
             Parameters:
                 installed_capacity (float, int): Peak generation power output [W]
         """
+
+        # technology specific constants
+        self.carbon_tax = True
 
         # calculate values
         self.calculate_max_power_profile()
@@ -240,7 +256,7 @@ class CoalGenerator(BaseGenerator):
         installed_capacity,
         co2_opex=980_000 * GRAM_MWH,
         nok_opex=(141 + 74) / 2 * USD_KWY,
-        nok_capex=(5327 + 3075) / 2 * USD_KW,
+        nok_capex=(5327 + 3075) / 2 * USD_KW / 40 / 52,
         min_output=0.32,
     ):
         super().__init__(
@@ -256,6 +272,9 @@ class CoalGenerator(BaseGenerator):
             Parameters:
                 installed_capacity (float, int): Peak generation power output [W]
         """
+
+        # technology specific constants
+        self.carbon_tax = True
 
         # calculate values
         self.calculate_max_power_profile()
@@ -275,7 +294,7 @@ class GasGenerator(BaseGenerator):
         installed_capacity,
         co2_opex=430_000 * GRAM_MWH,
         nok_opex=(59 + 21) / 2 * USD_KWY,
-        nok_capex=(2324 + 922) / 2 * USD_KW,
+        nok_capex=(2324 + 922) / 2 * USD_KW / 30 / 52,
         min_output=0.35,
     ):
         super().__init__(
@@ -291,6 +310,9 @@ class GasGenerator(BaseGenerator):
             Parameters:
                 installed_capacity (float, int): Peak generation power output [W]
         """
+
+        # technology specific constants
+        self.carbon_tax = True
 
         # calculate values
         self.calculate_max_power_profile()
