@@ -41,39 +41,39 @@ with st.sidebar:
 df = pd.DataFrame()
 
 demand = df_demand["demand"]
-t = np.linspace(0, 24, 24 * 6)
+t = np.linspace(0, 24, 24 * 7)
 df_prod = pd.DataFrame({"t": t})
-generation_solar = list(SolarGenerator(peak_value=12000).power.values())
+generation_solar = list(SolarGenerator(peak_value=12000).max_power.values())
 
 df_demand = df_demand.set_index("t")
 df_prod = df_prod.set_index("t")
-df_prod["solar"] = generation_solar
-df_prod["base"] = list(demand)
+# df_prod["solar"] = generation_solar
+# df_prod["base"] = list(demand)
 
 with st.empty():
     df_demand["demand"] = np.nan
-    df_prod["base"] = np.nan
-    df_prod["solar"] = np.nan
+    # df_prod["base"] = np.nan
+    # df_prod["solar"] = np.nan
     for seconds in range(0, len(demand), 3):
         df_demand["demand"].iloc[0:seconds] = list(demand)[0:seconds]
-        df_prod["base"].iloc[0:seconds] = list(0.9 * demand)[0:seconds]
-        df_prod["solar"].iloc[0:seconds] = generation_solar[0:seconds]
+        # df_prod["base"].iloc[0:seconds] = list(0.9 * demand)[0:seconds]
+        # df_prod["solar"].iloc[0:seconds] = generation_solar[0:seconds]
 
         st.altair_chart(
             alt.layer(
-                alt.Chart(
-                    pd.melt(df_prod.reset_index(), id_vars=["t"]),
-                    width=640,
-                    height=480,
-                )
-                .mark_area()
-                .encode(
-                    alt.X("t", title=""),
-                    alt.Y("value", title="", stack=True),
-                    alt.Color("variable", title="", type="nominal"),
-                    opacity={"value": 0.7},
-                )
-                .interactive(),
+                # alt.Chart(
+                #     pd.melt(df_prod.reset_index(), id_vars=["t"]),
+                #     width=640,
+                #     height=480,
+                # )
+                # .mark_area()
+                # .encode(
+                #     alt.X("t", title=""),
+                #     alt.Y("value", title="", stack=True),
+                #     alt.Color("variable", title="", type="nominal"),
+                #     opacity={"value": 0.7},
+                # )
+                # .interactive(),
                 alt.Chart(pd.melt(df_demand.reset_index(), id_vars=["t"]))
                 .mark_line()
                 .encode(
