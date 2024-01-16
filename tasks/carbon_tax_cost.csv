@@ -1,0 +1,5 @@
+"Added cost to using fossil fuels from carbon tax and emission trading per MWh, 76 EUR/tCO2eq tax+80EUR/tCO2eq EU ETS",
+fuel,EUR/MWh
+coal,152880
+oil,121680
+natural gas,67080

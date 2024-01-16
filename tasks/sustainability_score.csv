@@ -1,0 +1,12 @@
+"scoring system for sustaiability for the traingle, lower and upper values give a range of gCO2eq/MWh of the modelled grid ",,
+lower,upper,score
+0,25000,10
+26000,50000,9
+51000,75000,8
+76000,100000,7
+101000,200000,6
+201000,300000,5
+301000,400000,4
+401000,500000,3
+501000,600000,2
+601000,and more,1
