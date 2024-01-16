@@ -57,45 +57,49 @@ class BaseGenerator:
 
 
 class SolarGenerator(BaseGenerator):
-    def __init__(self, time_steps, co2_opex=100, nok_opex=100, nok_capex=100, min_output=1., peak_value = 100, range_ = 12, peak_time = 12):
+    def __init__(self, time_steps, installed_capacity, co2_opex=100, nok_opex=100, nok_capex=100, min_output=1., range_ = 12, peak_time = 12):
         super().__init__(co2_opex=co2_opex, nok_opex=nok_opex, nok_capex=nok_capex, min_output=min_output, time_steps=time_steps)
         """
         Initialise technology specific values
             Parameters:
-                peak_value (float, int): Peak generation power output [W]
+                installed_capacity (float, int): Installed capacity [W]
                 range_ (float, int): Duration of sunlight [mins]
                 peak_time (float, int): Time of day that peak generation occurs [mins]
         """
 
         # technology specific constants
-        self.peak_value = peak_value
+        self.installed_capacity = installed_capacity
         self.range = range_
         self.peak_time = peak_time
+        self.daily_capcity = np.random.uniform(0.6,1,int(self.time_steps.max()/24))
 
         # calculate values
         self.calculate_max_power_profile()
         self.calculate_min_power_profile()
 
     def calculate_max_power_profile(self):
+
         # calculate daily power profile
-        self.max_power = {}
-        for t in self.time_steps:
-            self.max_power[t] = norm.pdf(t, 12, self.range/2/3)
-        self.max_power = {k:v/max(self.max_power.values())*self.peak_value for k,v in self.max_power.items()}
+        max_power = np.zeros_like(self.time_steps)
+        for day in range(int(self.time_steps.max()/24)):
+            day_power = norm.pdf(self.time_steps, (day+0.5)*24, self.range/2/3)
+            day_power = day_power/day_power.max()*self.daily_capcity[day]
+            max_power = max_power + day_power
+        self.max_power = {k:v for k,v in zip(self.time_steps, max_power)}
 
 class NuclearGenerator(BaseGenerator):
-    def __init__(self, time_steps, co2_opex=100, nok_opex=100, nok_capex=100, min_output=1., peak_value = 100):
+    def __init__(self, time_steps, installed_capacity, co2_opex=100, nok_opex=100, nok_capex=100, min_output=1.):
         super().__init__(co2_opex=co2_opex, nok_opex=nok_opex, nok_capex=nok_capex, min_output=min_output, time_steps=time_steps)
         """
         Initialise technology specific values
             Parameters:
-                peak_value (float, int): Peak generation power output [W]
+                installed_capacity (float, int): Peak generation power output [W]
                 range_ (float, int): Duration of sunlight [mins]
                 peak_time (float, int): Time of day that peak generation occurs [mins]
         """
 
         # technology specific constants
-        self.peak_value = peak_value
+        self.installed_capacity = installed_capacity
 
         # calculate values
         self.calculate_max_power_profile()
@@ -105,4 +109,4 @@ class NuclearGenerator(BaseGenerator):
         # calculate daily power profile
         self.max_power = {}
         for t in self.time_steps:
-            self.max_power[t] = self.peak_value
+            self.max_power[t] = self.installed_capacity

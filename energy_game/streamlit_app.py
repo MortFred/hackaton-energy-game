@@ -44,7 +44,7 @@ demand = df_demand["demand"]
 t = np.linspace(0, 24 * 7, 24 * 7)
 df_prod = pd.DataFrame({"t": t})
 generation_solar = list(
-    SolarGenerator(time_steps=t, peak_value=solar).max_power.values()
+    SolarGenerator(time_steps=t, installed_capacity=solar).max_power.values()
 )
 generation_wind = list(WindGenerator(peak_value=wind).max_power)
 
