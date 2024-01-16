@@ -43,7 +43,7 @@ df = pd.DataFrame()
 demand = df_demand["demand"]
 t = np.linspace(0, 24, 24 * 7)
 df_prod = pd.DataFrame({"t": t})
-generation_solar = list(SolarGenerator(peak_value=12000).power.values())
+generation_solar = list(SolarGenerator(peak_value=12000).max_power.values())
 
 df_demand = df_demand.set_index("t")
 df_prod = df_prod.set_index("t")
