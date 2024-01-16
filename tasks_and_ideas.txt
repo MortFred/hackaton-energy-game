@@ -7,8 +7,10 @@ Tasks
 - Weeks chosen: 4 representative weeks? Calculate the score first of all for these 4 weeks and eventually extend the internal calculation later on to a year (but still just show 4 weeks).
 
 Scaling:
-- For costs: overall_cost = CAPEX_per_W * Capacity installed + OPEX_per_Wh * Wh_produced (<- adding all sources)
+- For costs: overall_cost = CAPEX_per_MW * Capacity_installed + OPEX_per_MWh * MWh_produced (<- adding all sources)
               Cost-file for sources will be provided
-- Cost scaling: Interpolate the score with cost_per_kWh = overall_cost / overall_Wh_produced for 30cents/kWh is a 0 and 5 cents/kWh is a 100% score.
+- Cost scaling: Interpolate the score with cost_per_MWh = overall_cost / overall_MWh_produced for 300€ per MWh is a 0% and 50€ per MWh is a 100% score.
 
-- For CO2-Emissions: Emission = 
+- For CO2-Emissions: total_emissions = C02_emissions_per_MWh * MWh_produced for each power plant, added for each time step. 
+
+- Stability: 100% security is if the possible_production_MW is >=15% of the overall_maximum_demand_MW on top of the current_demand_MW. 0% is if possible_production_MW is <= current_demand_MW.
