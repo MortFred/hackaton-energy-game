@@ -4,9 +4,9 @@ import pandas as pd
 import altair as alt
 
 import numpy as np
-from energy_game.classes.generators import SolarGenerator
-from energy_game.classes.wind_power import WindGenerator
-from energy_game.data.get_demand_curve import get_demand_curve
+from classes.generators import SolarGenerator
+from classes.wind_power import WindGenerator
+from data.get_demand_curve import get_demand_curve
 
 st.header("Energy Grid Game")
 
