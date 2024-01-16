@@ -2,6 +2,7 @@ import math
 
 from scipy.stats import norm
 
+
 class BaseGenerator:
     def __init__(self, co2_rate=100, nok_rate=100, time_delta=10):
         """
@@ -20,13 +21,21 @@ class BaseGenerator:
 
     def calculate_costs(self):
         # calculate finanical and emissions costs
-        power_total = sum(self.power.values())*self.time_delta*60
-        self.co2 = power_total*self.co2_rate
-        self.nok = power_total*self.nok_rate
-    
+        power_total = sum(self.power.values()) * self.time_delta * 60
+        self.co2 = power_total * self.co2_rate
+        self.nok = power_total * self.nok_rate
+
 
 class SolarGenerator(BaseGenerator):
-    def __init__(self, co2_rate=100, nok_rate=100, time_delta=10, peak_value = 100, range_ = 12*60, peak_time = 12*60):
+    def __init__(
+        self,
+        co2_rate=100,
+        nok_rate=100,
+        time_delta=10,
+        peak_value=100,
+        range_=12 * 60,
+        peak_time=12 * 60,
+    ):
         super().__init__(co2_rate, nok_rate, time_delta)
         """
         Initialise technology specific values
@@ -48,6 +57,11 @@ class SolarGenerator(BaseGenerator):
     def calculate_power_profile(self):
         # calculate daily power profile
         self.power = {}
-        for i in range(math.ceil(24*60/self.time_delta)+1):
-            self.power[self.time_delta*i] = norm.pdf(self.time_delta*i, 12*60, self.range/2/3)
-        self.power = {k:v/max(self.power.values())*self.peak_value for k,v in self.power.items()}
+        for i in range(math.ceil(24 * 60 / self.time_delta)):
+            self.power[self.time_delta * i] = norm.pdf(
+                self.time_delta * i, 12 * 60, self.range / 2 / 3
+            )
+        self.power = {
+            k: v / max(self.power.values()) * self.peak_value
+            for k, v in self.power.items()
+        }
