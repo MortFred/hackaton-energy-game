@@ -1,7 +1,7 @@
 Tasks
 
 - change sliders to capacity input: " xxx GW installed" and as output "~ # of plants"
-    (List of MW per Plant will be provided. As first values: 2GW per nuclear plant, 4MW per wind turbine onshore, 8MW per wind turbine offshore)
+    (List of MW per Plant will be provided. As first values: 2GW per nuclear plant, 5.4MW per wind turbine onshore, 8.6MW per wind turbine offshore)
 
 - Simulating per time step: Add all possible energy capacities up (100% of the fossil capacities and x% of the renewables according to the time series) and then cut down to minimum load according to the priority. Starting from the cutting down: 1 Oil, 2 Coal, 3 Gas, 4 Wind, 5 Hydro, 6 Solar, Nuclear is uncuttable)
 
