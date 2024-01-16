@@ -26,7 +26,6 @@ def calculate_production(ENERGY_PRODUCERS, df_demand, priority_list):
     remove_cols = [name + "_max" for name in priority_list if name in df_prod]
     remove_cols += ["total"]
     df_prod = df_prod.drop(axis=1, labels=remove_cols)
-    print(df_prod)
     return df_prod
 
 
