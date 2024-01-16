@@ -6,5 +6,9 @@ Tasks
 
 - Weeks chosen: 4 representative weeks? Calculate the score first of all for these 4 weeks and eventually extend the internal calculation later on to a year (but still just show 4 weeks).
 
-- For costs: Overall cost = CAPEX/W * Capacity installed + OPEX/Wh * Wh produced (<- adding all sources)
-              Cost file will be provided
+Scaling:
+- For costs: overall_cost = CAPEX_per_W * Capacity installed + OPEX_per_Wh * Wh_produced (<- adding all sources)
+              Cost-file for sources will be provided
+- Cost scaling: Interpolate the score with cost_per_kWh = overall_cost / overall_Wh_produced for 30cents/kWh is a 0 and 5 cents/kWh is a 100% score.
+
+- For CO2-Emissions: Emission = 
