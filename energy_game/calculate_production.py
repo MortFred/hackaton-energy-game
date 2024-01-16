@@ -1,28 +1,6 @@
 import numpy as np
 import pandas as pd
 
-# from classes.generators import (
-#     CoalGenerator,
-#     GasGenerator,
-#     NuclearGenerator,
-#     OilGenerator,
-#     SolarGenerator,
-#     WindGenerator,
-# )
-
-# t = np.linspace(0, 24 * 7, 24 * 7)
-# ENERGY_PRODUCERS = {
-#     # "solar": SolarGenerator(time_steps=t, installed_capacity=100),
-#     # "wind": WindGenerator(time_steps=t, installed_capacity=100),
-#     "oil": OilGenerator(time_steps=t, installed_capacity=100),
-#     "gas": GasGenerator(time_steps=t, installed_capacity=100),
-#     "coal": CoalGenerator(time_steps=t, installed_capacity=100),
-#     "nuclear": NuclearGenerator(time_steps=t, installed_capacity=100),
-# }
-# PRIORITY_LIST = ["nuclear", "solar", "hydro", "wind", "gas", "coal", "oil"]
-# demand = pd.DataFrame({"t": t})
-# demand["demand"] = 200
-
 
 def calculate_production(ENERGY_PRODUCERS, df_demand, priority_list):
     t = np.linspace(0, 24 * 7, 24 * 7)
@@ -52,7 +30,11 @@ def calculate_production(ENERGY_PRODUCERS, df_demand, priority_list):
     return df_prod
 
 
-# calculate_production(ENERGY_PRODUCERS, demand, PRIORITY_LIST)
+def calculate_cost_score(df_prod, ENERGY_PRODUCERS):
+    nok = 0
+    co2 = 0
+    for key, producer in ENERGY_PRODUCERS.items():
+        nok += producer.calculate_costs(df_prod[key])[0]
+        co2 += producer.calculate_costs(df_prod[key])[1]
 
-# solar_gen.nok_capex*solar_gen.installed_capacity + solar_gen.nok_opex*solar_total_produced:9.0f
-# solar_gen.co2_opex*solar_total_produced:9.0f
+    return nok, co2

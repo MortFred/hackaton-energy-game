@@ -5,7 +5,7 @@ import altair as alt
 
 import numpy as np
 from data.get_demand_curve import get_demand_curve
-from calculate_production import calculate_production
+from calculate_production import calculate_cost_score, calculate_production
 from classes.generators import (
     CoalGenerator,
     GasGenerator,
@@ -63,6 +63,7 @@ PRIORITY_LIST = ["nuclear", "solar", "hydro", "wind", "gas", "coal", "oil"]
 
 df_demand = df_demand.set_index("t")
 df_prod = calculate_production(ENERGY_PRODUCERS, df_demand, PRIORITY_LIST)
+co2, nok = calculate_cost_score(df_prod=df_prod, ENERGY_PRODUCERS=ENERGY_PRODUCERS)
 
 cont1 = st.container()
 with cont1:
@@ -70,9 +71,9 @@ with cont1:
 cont2 = st.container()
 
 with col1:
-    st.write(f"Price score: {0}")
+    st.write(f"Price score: {nok:9.0f}")
 with col2:
-    st.write(f"CO2 score: {0}")
+    st.write(f"CO2 score: {co2:9.0f}")
 with col3:
     st.write(f"Stability score: {100}")
 
