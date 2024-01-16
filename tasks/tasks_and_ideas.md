@@ -21,4 +21,6 @@ Scaling:
 
 
 IDEAS:
+- storage: Similar to a generator (will have a MW Capacity and a CAPEX and OPEX) capacity started with 50% loaded (becomes less important when the simulation will be run for a year)
+- interconnections: implemented as in and export price.
 - switch for "smart grid" to improve the stability scole. Maybe put in the % of flexibility that a consumer demand is flexible (smart electric vehicle loading, industrial operation, storage, batteries etc.). It will within this % then in- or decrease the MWh_demand according to the possible_MWh_production.
