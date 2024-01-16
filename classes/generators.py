@@ -75,7 +75,7 @@ class SolarGenerator(BaseGenerator):
     def calculate_max_power_profile(self):
         # calculate daily power profile
         self.max_power = {}
-        for i in range(math.ceil(24*60/self.time_delta)+1):
+        for i in range(math.ceil(24*60/self.time_delta)):
             self.max_power[self.time_delta*i] = norm.pdf(self.time_delta*i, 12*60, self.range/2/3)
         self.max_power = {k:v/max(self.max_power.values())*self.peak_value for k,v in self.max_power.items()}
 
@@ -100,5 +100,5 @@ class NuclearGenerator(BaseGenerator):
     def calculate_max_power_profile(self):
         # calculate daily power profile
         self.max_power = {}
-        for i in range(math.ceil(24*60/self.time_delta)+1):
+        for i in range(math.ceil(24*60/self.time_delta)):
             self.max_power[self.time_delta*i] = self.peak_value
