@@ -1,3 +1,4 @@
+import math
 import streamlit as st
 import pandas as pd
 import altair as alt
@@ -7,72 +8,80 @@ from classes.generation import SolarGenerator
 
 from data.get_demand_curve import get_demand_curve
 
-st.header("hackathon-energy-game")
+st.header("Energy Grid Game")
+
+df_demand = get_demand_curve()
+max_demand = max(df_demand["demand"])
+coal = 0
+gas = 0
+nuclear = 0
+solar = 0
+wind = 0
+hydro = 0
+
 
 with st.sidebar:
-    st.subheader("Initial game parameters")
+    st.subheader("Energy Mix")
+    coal = st.number_input("Coal (MW)", value=coal)
+    gas = st.number_input("Gas (MW)", value=gas)
+    nuclear = st.number_input("Nuclear (MW)", value=nuclear)
+    solar = st.number_input("Solar (MW)", value=solar)
+    wind = st.number_input("Wind (MW)", value=wind)
+    hydro = st.number_input("Hydro (MW)", value=hydro, max_value=500)
 
-    country = st.selectbox("Choose a country", ["Norway"])
+    total_production = coal + gas + nuclear + solar + wind + hydro
+    if total_production < math.ceil(max_demand):
+        st.write(f"Installed Capacity: :red[{total_production}]/{max_demand:5.0f}")
+    else:
+        st.write(f"Installed Capacity: :green[{total_production}]/{max_demand:5.0f}")
 
-    st.text("Energy sources:")
-    coal = st.slider("Coal", 0, 100)
-    gas = st.slider("Gas", 0, 100)
-    oil = st.slider("Oil", 0, 100)
-    nuclear = st.slider("Nuclear", 0, 100)
-    solar = st.slider("Solar", 0, 100)
-    wind = st.slider("Wind", 0, 100)
-    hydro = st.slider("Hydro", 0, 100)
-    wave = st.slider("Wave", 0, 100)
-    tidal = st.slider("Tidal", 0, 100)
+    button_display = st.button("Run Simulation")
 
-    button_display = st.button("Display curves")
+# if button_display:
+df = pd.DataFrame()
 
-if button_display:
-    df = pd.DataFrame()
+demand = df_demand["demand"]
+t = np.linspace(0, 24, 24 * 6)
+df_prod = pd.DataFrame({"t": t})
+generation_solar = list(SolarGenerator(peak_value=12000).power.values())
 
-    df_demand = get_demand_curve()
-    demand = df_demand["demand"]
-    t = np.linspace(0, 24, 24 * 6)
-    df_prod = pd.DataFrame({"t": t})
-    generation_solar = list(SolarGenerator(peak_value=12000).power.values())
+df_demand = df_demand.set_index("t")
+df_prod = df_prod.set_index("t")
+df_prod["solar"] = generation_solar
+df_prod["base"] = list(demand)
 
-    df_demand = df_demand.set_index("t")
-    df_prod = df_prod.set_index("t")
-    df_prod["solar"] = generation_solar
-    df_prod["generic"] = list(demand)
+with st.empty():
+    df_demand["demand"] = np.nan
+    df_prod["base"] = np.nan
+    df_prod["solar"] = np.nan
+    for seconds in range(0, len(demand), 3):
+        df_demand["demand"].iloc[0:seconds] = list(demand)[0:seconds]
+        df_prod["base"].iloc[0:seconds] = list(0.9 * demand)[0:seconds]
+        df_prod["solar"].iloc[0:seconds] = generation_solar[0:seconds]
 
-    with st.empty():
-        df_demand["demand"] = np.nan
-        df_prod["generic"] = np.nan
-        df_prod["solar"] = np.nan
-        for seconds in range(len(demand)):
-            df_demand["demand"].iloc[0:seconds] = list(demand)[0:seconds]
-            df_prod["generic"].iloc[0:seconds] = list(demand)[0:seconds]
-            df_prod["solar"].iloc[0:seconds] = generation_solar[0:seconds]
-
-            st.altair_chart(
-                alt.layer(
-                    alt.Chart(
-                        pd.melt(df_prod.reset_index(), id_vars=["t"]),
-                        width=640,
-                        height=480,
-                    )
-                    .mark_area()
-                    .encode(
-                        alt.X("t", title=""),
-                        alt.Y("value", title="", stack=True),
-                        alt.Color("variable", title="", type="nominal"),
-                        opacity={"value": 0.7},
-                    )
-                    .interactive(),
-                    alt.Chart(pd.melt(df_demand.reset_index(), id_vars=["t"]))
-                    .mark_line()
-                    .encode(
-                        alt.X("t", title=""),
-                        alt.Y("value", title="", stack=True),
-                        alt.Color("variable", title="", type="nominal"),
-                        opacity={"value": 0.7},
-                    )
-                    .interactive(),
+        st.altair_chart(
+            alt.layer(
+                alt.Chart(
+                    pd.melt(df_prod.reset_index(), id_vars=["t"]),
+                    width=640,
+                    height=480,
                 )
+                .mark_area()
+                .encode(
+                    alt.X("t", title=""),
+                    alt.Y("value", title="", stack=True),
+                    alt.Color("variable", title="", type="nominal"),
+                    opacity={"value": 0.7},
+                )
+                .interactive(),
+                alt.Chart(pd.melt(df_demand.reset_index(), id_vars=["t"]))
+                .mark_line()
+                .encode(
+                    alt.X("t", title=""),
+                    alt.Y("value", title="", stack=True),
+                    alt.Color("variable", title="", type="nominal"),
+                    opacity={"value": 0.7},
+                )
+                .interactive(),
             )
+        )
