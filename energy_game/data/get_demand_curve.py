@@ -11,5 +11,3 @@ def get_demand_curve():
     demand = np.interp(t, np.arange(0, 24 * 7), norway_data.iloc[:, 2])
 
     return pd.DataFrame({"t": t, "demand": demand})
-
-
