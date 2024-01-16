@@ -1,30 +1,58 @@
 import numpy as np
 import pandas as pd
 
-from classes.generators import (
-    OilGenerator,
-    SolarGenerator,
-    WindGenerator,
-    NuclearGenerator,
-)
+# from classes.generators import (
+#     CoalGenerator,
+#     GasGenerator,
+#     NuclearGenerator,
+#     OilGenerator,
+#     SolarGenerator,
+#     WindGenerator,
+# )
+
+# t = np.linspace(0, 24 * 7, 24 * 7)
+# ENERGY_PRODUCERS = {
+#     # "solar": SolarGenerator(time_steps=t, installed_capacity=100),
+#     # "wind": WindGenerator(time_steps=t, installed_capacity=100),
+#     "oil": OilGenerator(time_steps=t, installed_capacity=100),
+#     "gas": GasGenerator(time_steps=t, installed_capacity=100),
+#     "coal": CoalGenerator(time_steps=t, installed_capacity=100),
+#     "nuclear": NuclearGenerator(time_steps=t, installed_capacity=100),
+# }
+# PRIORITY_LIST = ["nuclear", "solar", "hydro", "wind", "gas", "coal", "oil"]
+# demand = pd.DataFrame({"t": t})
+# demand["demand"] = 200
 
 
-def calculate_production(solar=1, wind=1, nuclear=1, oil=1):
+def calculate_production(ENERGY_PRODUCERS, df_demand, priority_list):
     t = np.linspace(0, 24 * 7, 24 * 7)
     df_prod = pd.DataFrame({"t": t})
-    solar_gen = SolarGenerator(time_steps=t, installed_capacity=solar)
-    wind_gen = WindGenerator(time_steps=t, installed_capacity=wind)
-    nuc_gen = NuclearGenerator(time_steps=t, installed_capacity=nuclear)
-    oil_gen = OilGenerator(time_steps=t, installed_capacity=oil)
     df_prod = df_prod.set_index("t")
-    df_prod["nuclear"] = pd.Series(nuc_gen.min_power)
-    df_prod["oil"] = pd.Series(oil_gen.min_power)
-    df_prod["solar"] = pd.Series(solar_gen.min_power)
-    df_prod["wind"] = pd.Series(wind_gen.min_power)
 
+    df_prod["total"] = 0
+    for name, producer in ENERGY_PRODUCERS.items():
+        df_prod[name] = producer.min_power.values()
+        df_prod[name + "_max"] = producer.max_power.values()
+        df_prod["total"] += list(producer.min_power.values())
+
+    for name in priority_list:
+        if name not in df_prod:
+            continue
+        for i, row in enumerate(df_demand["demand"]):
+            missing_prod = row - df_prod["total"].iloc[i]
+            if missing_prod > 0:
+                delta = df_prod[name + "_max"].iloc[i] - df_prod[name].iloc[i]
+                df_prod[name].iloc[i] += min(missing_prod, delta)
+                df_prod["total"].iloc[i] += min(missing_prod, delta)
+
+    remove_cols = [name + "_max" for name in priority_list if name in df_prod]
+    remove_cols += ["total"]
+    df_prod = df_prod.drop(axis=1, labels=remove_cols)
+    print(df_prod)
     return df_prod
 
 
-print(calculate_production(100, 100, 100, 100))
+# calculate_production(ENERGY_PRODUCERS, demand, PRIORITY_LIST)
+
 # solar_gen.nok_capex*solar_gen.installed_capacity + solar_gen.nok_opex*solar_total_produced:9.0f
 # solar_gen.co2_opex*solar_total_produced:9.0f

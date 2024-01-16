@@ -6,7 +6,14 @@ import altair as alt
 import numpy as np
 from data.get_demand_curve import get_demand_curve
 from calculate_production import calculate_production
-from energy_game.classes.generators import SolarGenerator, WindGenerator
+from classes.generators import (
+    CoalGenerator,
+    GasGenerator,
+    NuclearGenerator,
+    OilGenerator,
+    SolarGenerator,
+    WindGenerator,
+)
 
 st.header("Energy Grid Game")
 
@@ -46,25 +53,22 @@ df_prod = pd.DataFrame({"t": t})
 ENERGY_PRODUCERS = {
     "solar": SolarGenerator(time_steps=t, installed_capacity=solar),
     "wind": WindGenerator(time_steps=t, installed_capacity=wind),
+    "oil": OilGenerator(time_steps=t, installed_capacity=oil),
+    "gas": GasGenerator(time_steps=t, installed_capacity=gas),
+    "coal": CoalGenerator(time_steps=t, installed_capacity=coal),
+    "nuclear": NuclearGenerator(time_steps=t, installed_capacity=nuclear),
 }
 
-generation_solar = list(ENERGY_PRODUCERS["solar"].max_power.values())
-generation_wind = list(ENERGY_PRODUCERS["wind"].max_power.values())
+PRIORITY_LIST = ["nuclear", "solar", "hydro", "wind", "gas", "coal", "oil"]
 
 df_demand = df_demand.set_index("t")
-df_prod = df_prod.set_index("t")
-df_prod["wind"] = generation_wind
-df_prod["solar"] = generation_solar
-solar_gen = ENERGY_PRODUCERS["solar"]
-df_demand = df_demand.set_index("t")
-df_prod = calculate_production(solar=solar, wind=wind, nuclear=nuclear, oil=oil)
+df_prod = calculate_production(ENERGY_PRODUCERS, df_demand, PRIORITY_LIST)
 
 cont1 = st.container()
 with cont1:
     col1, col2, col3 = st.columns(3)
 cont2 = st.container()
 
-solar_total_produced = sum(df_prod["solar"])
 with col1:
     st.write(f"Price score: {0}")
 with col2:
@@ -75,16 +79,17 @@ with col3:
 with st.empty():
     df_demand["demand"] = np.nan
     output = df_prod.copy()
-    output["nuclear"] = np.nan
-    output["oil"] = np.nan
+
+    # output["nuclear"] = np.nan
+    # output["oil"] = np.nan
     output["wind"] = np.nan
     output["solar"] = np.nan
     for hour in range(0, len(demand), 3):
         df_demand["demand"].iloc[0:hour] = list(demand)[0:hour]
         output["solar"].iloc[0:hour] = df_prod["solar"].iloc[0:hour]
         output["wind"].iloc[0:hour] = df_prod["wind"].iloc[0:hour]
-        output["oil"].iloc[0:hour] = df_prod["oil"].iloc[0:hour]
-        output["nuclear"].iloc[0:hour] = df_prod["nuclear"].iloc[0:hour]
+        # output["oil"].iloc[0:hour] = df_prod["oil"].iloc[0:hour]
+        # output["nuclear"].iloc[0:hour] = df_prod["nuclear"].iloc[0:hour]
 
         st.altair_chart(
             alt.layer(
