@@ -19,7 +19,7 @@ Scaling:
 
 - Recheck carbon taxes
 
-
+- Multiply all three scores together for the final score (whether each score is from 0 to 1 are from 1 to 10 could still be decided)
 IDEAS:
 - storage: Similar to a generator (will have a MW Capacity and a CAPEX and OPEX) capacity started with 50% loaded (becomes less important when the simulation will be run for a year)
 - interconnections: implemented as in and export price.
