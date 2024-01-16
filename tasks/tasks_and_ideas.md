@@ -17,10 +17,10 @@ Scaling:
 
 - Stability: Per time step 100% security is if the possible_production_MW is >=15% of the overall_maximum_demand_MW on top of the current_demand_MW. 0% is if possible_production_MW is <= current_demand_MW. For the score, all percentages are multiplied together, so that always having +15% possible capacity is 100% overall security and having an underproduction at one point (alias Black-out) is 0%.
 
-
+- Recheck carbon taxes
 
 
 IDEAS:
 - storage: Similar to a generator (will have a MW Capacity and a CAPEX and OPEX) capacity started with 50% loaded (becomes less important when the simulation will be run for a year)
 - interconnections: implemented as in and export price.
-- switch for "smart grid" to improve the stability scole. Maybe put in the % of flexibility that a consumer demand is flexible (smart electric vehicle loading, industrial operation, storage, batteries etc.). It will within this % then in- or decrease the MWh_demand according to the possible_MWh_production.
+- switch for "smart grid" to improve the stability scole. Maybe put in the % of flexibility that a consumer demand is flexible (smart electric vehicle loading, industrial operation etc.). It will within this % then in- or decrease the MWh_demand according to the possible_MWh_production.
