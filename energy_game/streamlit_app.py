@@ -4,8 +4,7 @@ import pandas as pd
 import altair as alt
 
 import numpy as np
-from classes.generators import SolarGenerator
-from classes.wind_power import WindGenerator
+from classes.generators import SolarGenerator, WindGenerator
 from data.get_demand_curve import get_demand_curve
 
 st.header("Energy Grid Game")
@@ -46,7 +45,9 @@ df_prod = pd.DataFrame({"t": t})
 generation_solar = list(
     SolarGenerator(time_steps=t, installed_capacity=solar).max_power.values()
 )
-generation_wind = list(WindGenerator(peak_value=wind).max_power)
+generation_wind = list(
+    WindGenerator(time_steps=t, installed_capacity=wind).max_power.values()
+)
 
 df_demand = df_demand.set_index("t")
 df_prod = df_prod.set_index("t")
